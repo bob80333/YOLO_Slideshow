@@ -38,8 +38,8 @@ def download_images():
 
 
 def run_yolo():
-    # if there are new images to process
-    if (os.listdir(WEBSITE_IMAGE_DIR).count() > 0):
+    # if there are new images to process (there is always 1 thing there, the out directory)
+    if len(os.listdir(WEBSITE_IMAGE_DIR)) > 1:
         # run yolo command
         yolo = subprocess.Popen(YOLO_COMMAND.split())
         # wait for yolo to finish processing
