@@ -26,6 +26,7 @@ new_images = True
 
 # download the images, and make sure they haven't been downloaded before
 def download_images():
+    global new_images
     new_images = False
     with urllib.request.urlopen(WEBSITE_LINK) as response:
         html = response.read()
