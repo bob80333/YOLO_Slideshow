@@ -12,8 +12,8 @@ import os
 
 from bs4 import BeautifulSoup
 
-YOLO_COMMAND = "flow --model cfg/yolo.cfg --load bin/yolo.weights --imgDir websiteImages/ --threshold 0.3"
-MOVE_COMMAND = "mv -v websiteImages/out/* slideshow/"
+YOLO_COMMAND = "flow --model cfg/yolo.cfg --load bin/yolo.weights --imgdir websiteImages/ --threshold 0.3"
+MOVE_COMMAND = "mv websiteImages/out/* slideshow/"
 REMOVE_INPUT_COMMAND = "rm -f websiteImages/*"
 REMOVE_OUTPUT_COMMAND = "rm -f websiteImages/out/*"
 WEBSITE_LINK = "http://mechrono.x10host.com/vult/img/"
@@ -41,7 +41,7 @@ def download_images():
 
 def run_yolo():
     # run yolo command
-    yolo = subprocess.Popen(YOLO_COMMAND)
+    yolo = subprocess.Popen(YOLO_COMMAND.split())
     # wait for yolo to finish processing
     yolo.wait()
 
@@ -51,24 +51,19 @@ def timestamp_output():
     for image in os.listdir(PROCESSED_IMAGE_DIR):
         # run this ImageMagick command via the system shell
         os.system("convert " + PROCESSED_IMAGE_DIR + os.path.basename(image) +
-                         "   -background White  label:'"+ time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()) +
+                         "   -background White  label:'" + "Processed at: " + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()) +
                          "' -gravity Center -append    " + PROCESSED_IMAGE_DIR + os.path.basename(image))
 
 
 def move_output():
     # run move command
-    move = subprocess.Popen(MOVE_COMMAND)
-    # wait for files to be moved
-    move.wait()
+    os.system(MOVE_COMMAND)
 
 
 def cleanup():
     # run remove commands
-    rm_input = subprocess.Popen(REMOVE_INPUT_COMMAND)
-    rm_output = subprocess.Popen(REMOVE_OUTPUT_COMMAND)
-
-    # wait for both commands to complete
-    [rm.wait() for rm in (rm_input, rm_output)]
+    os.system(REMOVE_INPUT_COMMAND)
+    os.system(REMOVE_OUTPUT_COMMAND)
 
 
 def main():
@@ -85,7 +80,7 @@ def main():
         time.sleep(.5)
         cleanup()
         # wait a few seconds before re-running
-        time.sleep(2.5)
+        time.sleep(3.5)
 
 # run the program
 main()
