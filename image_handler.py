@@ -74,6 +74,4 @@ def main():
         time.sleep(2.5)
 
 # run the program
-#main()
-
-download_images()
+main()
