@@ -8,15 +8,17 @@
 import subprocess
 import time
 import urllib.request
+import os
 
 from bs4 import BeautifulSoup
 
 YOLO_COMMAND = "flow --model cfg/yolo.cfg --load bin/yolo.weights --imgDir websiteImages/ --threshold 0.3"
-MOVE_COMMAND = "mv -v websiteImages/out/* ../slideshow/"
+MOVE_COMMAND = "mv -v websiteImages/out/* slideshow/"
 REMOVE_INPUT_COMMAND = "rm -f websiteImages/*"
 REMOVE_OUTPUT_COMMAND = "rm -f websiteImages/out/*"
 WEBSITE_LINK = "http://mechrono.x10host.com/vult/img/"
-WEBSITE_IMAGE_DIRECTORY = "websiteImages/"
+WEBSITE_IMAGE_DIR = "websiteImages/"
+PROCESSED_IMAGE_DIR= "websiteImages/out/"
 
 already_seen = set([])
 
@@ -32,7 +34,7 @@ def download_images():
                 continue
             else:
                 already_seen.add(href)
-                urllib.request.urlretrieve(WEBSITE_LINK + href, WEBSITE_IMAGE_DIRECTORY + href)
+                urllib.request.urlretrieve(WEBSITE_LINK + href, WEBSITE_IMAGE_DIR + href)
 
 
 
@@ -42,6 +44,15 @@ def run_yolo():
     yolo = subprocess.Popen(YOLO_COMMAND)
     # wait for yolo to finish processing
     yolo.wait()
+
+
+def timestamp_output():
+    # for each file in the out dir
+    for image in os.listdir(PROCESSED_IMAGE_DIR):
+        # run this ImageMagick command via the system shell
+        os.system("convert " + PROCESSED_IMAGE_DIR + os.path.basename(image) +
+                         "   -background White  label:'"+ time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()) +
+                         "' -gravity Center -append    " + PROCESSED_IMAGE_DIR + os.path.basename(image))
 
 
 def move_output():
@@ -67,6 +78,9 @@ def main():
         time.sleep(.5)
         run_yolo()
         time.sleep(.5)
+        timestamp_output()
+        # wait extra long for ImageMagick in case it goes slowly
+        time.sleep(1.5)
         move_output()
         time.sleep(.5)
         cleanup()
