@@ -21,10 +21,12 @@ WEBSITE_IMAGE_DIR = "websiteImages/"
 PROCESSED_IMAGE_DIR = "websiteImages/out/"
 
 already_seen = set([])
+new_images = True
 
 
 # download the images, and make sure they haven't been downloaded before
 def download_images():
+    new_images = False
     with urllib.request.urlopen(WEBSITE_LINK) as response:
         html = response.read()
         soup = BeautifulSoup(html, "lxml")
@@ -33,17 +35,16 @@ def download_images():
             if "/" in href or href in already_seen:
                 continue
             else:
+                new_images = True
                 already_seen.add(href)
                 urllib.request.urlretrieve(WEBSITE_LINK + href, WEBSITE_IMAGE_DIR + href)
 
 
 def run_yolo():
-    # if there are new images to process (there is always 1 thing there, the out directory)
-    if len(os.listdir(WEBSITE_IMAGE_DIR)) > 1:
-        # run yolo command
-        yolo = subprocess.Popen(YOLO_COMMAND.split())
-        # wait for yolo to finish processing
-        yolo.wait()
+    # run yolo command
+    yolo = subprocess.Popen(YOLO_COMMAND.split())
+    # wait for yolo to finish processing
+    yolo.wait()
 
 
 def timestamp_output():
@@ -72,16 +73,21 @@ def main():
         # wait between steps for a half a second just in case
         download_images()
         time.sleep(.5)
-        run_yolo()
-        time.sleep(.5)
-        timestamp_output()
-        # wait extra long for ImageMagick in case it goes slowly
-        time.sleep(1.5)
-        move_output()
-        time.sleep(.5)
-        cleanup()
-        # wait a few seconds before re-running
-        time.sleep(3.5)
+
+        # only run the rest if there are new images
+        if new_images:
+            run_yolo()
+            time.sleep(.5)
+            timestamp_output()
+            # wait extra long for ImageMagick in case it goes slowly
+            time.sleep(1.5)
+            move_output()
+            time.sleep(.5)
+            cleanup()
+            # wait a few seconds before re-running
+            time.sleep(3.5)
+        else:
+            time.sleep(7)
 
 
 # run the program
