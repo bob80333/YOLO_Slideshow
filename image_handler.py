@@ -16,9 +16,9 @@ YOLO_COMMAND = "flow --model cfg/yolo.cfg --load bin/yolo.weights --imgdir websi
 MOVE_COMMAND = "mv websiteImages/out/* slideshow/"
 REMOVE_INPUT_COMMAND = "rm -f websiteImages/*"
 REMOVE_OUTPUT_COMMAND = "rm -f websiteImages/out/*"
-WEBSITE_LINK = "http://mechrono.x10host.com/vult/img/"
+WEBSITE_LINK = "http://mechrono.x10host.com/SeeME/img/"
 WEBSITE_IMAGE_DIR = "websiteImages/"
-PROCESSED_IMAGE_DIR= "websiteImages/out/"
+PROCESSED_IMAGE_DIR = "websiteImages/out/"
 
 already_seen = set([])
 
@@ -37,13 +37,13 @@ def download_images():
                 urllib.request.urlretrieve(WEBSITE_LINK + href, WEBSITE_IMAGE_DIR + href)
 
 
-
-
 def run_yolo():
-    # run yolo command
-    yolo = subprocess.Popen(YOLO_COMMAND.split())
-    # wait for yolo to finish processing
-    yolo.wait()
+    # if there are new images to process
+    if (os.listdir(WEBSITE_IMAGE_DIR).count() > 0):
+        # run yolo command
+        yolo = subprocess.Popen(YOLO_COMMAND.split())
+        # wait for yolo to finish processing
+        yolo.wait()
 
 
 def timestamp_output():
@@ -51,8 +51,9 @@ def timestamp_output():
     for image in os.listdir(PROCESSED_IMAGE_DIR):
         # run this ImageMagick command via the system shell
         os.system("convert " + PROCESSED_IMAGE_DIR + os.path.basename(image) +
-                         "   -background White  label:'" + "Processed at: " + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()) +
-                         "' -gravity Center -append    " + PROCESSED_IMAGE_DIR + os.path.basename(image))
+                  "   -background White  label:'" + "Processed at: " + time.strftime("%Y-%m-%d %H:%M:%S",
+                                                                                     time.gmtime()) +
+                  "' -gravity Center -append    " + PROCESSED_IMAGE_DIR + os.path.basename(image))
 
 
 def move_output():
@@ -81,6 +82,7 @@ def main():
         cleanup()
         # wait a few seconds before re-running
         time.sleep(3.5)
+
 
 # run the program
 main()
